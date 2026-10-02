@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="et">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Küberharjutused SG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: kitsas veerg, üleval tööriistade ruudustik, all ülesannete kaardid; kategooria = vasak värviriba sildis */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --fg:#17202b; --muted:#566273; --line:#d6dce4;
+  --accent:#1f5fbf; --accent-soft:#e3ecfa; --code-bg:#eef1f5;
+  --ok:#1d7a46; --ok-soft:#e1f3e8; --bad:#b3261e; --bad-soft:#fbe7e5;
+  --c-krypto:#7a4cc2; --c-vork:#0f7f8c; --c-pilt:#c2571a; --c-otsing:#2f6f2a;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"Source Sans 3",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151c; --surface:#18202a; --fg:#e4e9f0; --muted:#97a3b3; --line:#2a3542;
+  --accent:#7aa8f0; --accent-soft:#1d2b40; --code-bg:#0c1117;
+  --ok:#5fd08f; --ok-soft:#163222; --bad:#f08a80; --bad-soft:#3a1c1a;
+  --c-krypto:#b493ec; --c-vork:#4cc3cf; --c-pilt:#f0935a; --c-otsing:#86cc7c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#18202a; --fg:#e4e9f0; --muted:#97a3b3; --line:#2a3542;
+  --accent:#7aa8f0; --accent-soft:#1d2b40; --code-bg:#0c1117;
+  --ok:#5fd08f; --ok-soft:#163222; --bad:#f08a80; --bad-soft:#3a1c1a;
+  --c-krypto:#b493ec; --c-vork:#4cc3cf; --c-pilt:#f0935a; --c-otsing:#86cc7c; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 var(--f-body);padding-inline:16px;padding-block:24px 64px}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,5vw,2.9rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.5rem;font-weight:700}
+h3{font-size:1.08rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+header{display:grid;gap:16px}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);max-width:65ch}
+.scorebar{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.score{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:1.1rem}
+.score b{font-size:1.5rem}
+.meter{flex:1 1 200px;height:8px;background:var(--code-bg);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .4s}
+.btn-reset{font:inherit;font-size:.85rem;background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer}
+.section-head{display:grid;gap:6px;margin-bottom:16px}
+/* tools */
+.toolgroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.tg{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px;align-content:start}
+.tg h3{font-size:.95rem}
+.tg ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tg li a{font-weight:600;text-decoration:none}
+.tg li a:hover{text-decoration:underline}
+.tg li span{display:block;color:var(--muted);font-size:.9rem;line-height:1.35}
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{font:600 .88rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* tasks */
+.tasks{display:grid;gap:16px}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:grid;gap:12px;min-width:0}
+.task.solved{border-color:var(--ok)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--f-mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+.cat{padding:2px 8px;border-radius:4px;color:var(--surface);font-weight:600}
+.cat.krypto{background:var(--c-krypto)} .cat.vork{background:var(--c-vork)} .cat.pilt{background:var(--c-pilt)} .cat.otsing{background:var(--c-otsing)}
+.lvl{color:var(--muted)}
+.pts{margin-left:auto;font-weight:600}
+.task.solved .pts::after{content:" ✓";color:var(--ok)}
+.task p{max-width:70ch}
+.data{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
+.data pre{margin:0;padding:12px 14px;padding-right:76px;font:0.86rem/1.5 var(--f-mono);white-space:pre}
+.copy{position:absolute;top:8px;right:8px;font:600 .75rem var(--f-body);background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:5px;padding:3px 8px;cursor:pointer}
+.answer{display:flex;flex-wrap:wrap;gap:8px}
+.answer input{flex:1 1 220px;min-width:0;font:1rem var(--f-mono);padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.answer button{font:600 .95rem var(--f-body);padding:8px 18px;border-radius:6px;border:0;background:var(--accent);color:var(--surface);cursor:pointer}
+.opts{display:grid;gap:6px}
+.opts label{display:flex;gap:10px;align-items:baseline;padding:6px 10px;border:1px solid var(--line);border-radius:6px;cursor:pointer;font-family:var(--f-mono);font-size:.9rem;overflow-wrap:anywhere}
+.opts input{flex:none}
+.fb{font-weight:600;font-size:.95rem;padding:6px 12px;border-radius:6px}
+.fb.ok{background:var(--ok-soft);color:var(--ok)} .fb.bad{background:var(--bad-soft);color:var(--bad)}
+details summary{cursor:pointer;color:var(--muted);font-size:.92rem}
+details p{margin-top:6px;color:var(--muted);font-size:.95rem}
+.imgbox{display:grid;gap:10px}
+.imgbox canvas{width:100%;max-width:560px;height:auto;border-radius:6px;border:1px solid var(--line);image-rendering:pixelated}
+.imgbox .ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:.92rem;color:var(--muted)}
+.imgbox input[type=range]{flex:1 1 180px;max-width:320px}
+.rules{background:var(--accent-soft);border-radius:10px;padding:16px 20px;display:grid;gap:6px}
+.rules ul{margin:0;padding-left:1.2em}
+footer{color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">KüberPuuring 2026 · harjutamine enne koolivooru</div>
+  <h1>Küberharjutused</h1>
+  <p class="lead">Võistluse ülesanded jagunevad laias laastus nelja liiki: krüpto (kodeerimine ja šifrid), riistvara ja võrk, pildid ning otsing. Allpool on tööriistad, mida võistlusel tasub käepärast hoida, ja 20 harjutusülesannet, mille vastuse kontrollib leht kohe. Vastuses suur- ja väiketäht, tühikud ega täpitähed ei loe.</p>
+  <div class="scorebar">
+    <div class="score"><b id="got">0</b> / <span id="tot">0</span> punkti</div>
+    <div class="meter" aria-hidden="true"><i id="bar"></i></div>
+    <div class="score"><span id="nsolved">0</span> / <span id="ntask">0</span> lahendatud</div>
+    <button class="btn-reset" id="reset" type="button">Alusta otsast</button>
+  </div>
+</header>
+
+<section>
+  <div class="section-head">
+    <h2>Tööriistad</h2>
+    <p class="lead">Võistlusel võib kasutada internetti. Kõige rohkem aega säästab see, kui järgmised lehed on juba enne avatud ja tuttavad.</p>
+  </div>
+  <div class="toolgroups">
+    <div class="tg"><h3>Kodeerimine ja šifrid</h3><ul>
+      <li><a href="https://gchq.github.io/CyberChef/" target="_blank" rel="noopener">CyberChef</a><span>Base64, kuueteistkümnendsüsteem, kahendsüsteem, ROT13, XOR. Nupp „Magic“ proovib ise ära arvata.</span></li>
+      <li><a href="https://www.dcode.fr/cipher-identifier" target="_blank" rel="noopener">dCode – šifri tuvastaja</a><span>Kleebi tundmatu tekst ja vaata, mis šifriga võib tegu olla. Caesar, Vigenère, Morse jpt.</span></li>
+      <li><a href="https://morsecode.world/international/translator.html" target="_blank" rel="noopener">Morse'i tõlkija</a><span>Punktid ja kriipsud tekstiks ja vastupidi.</span></li>
+    </ul></div>
+    <div class="tg"><h3>Paroolid ja räsid</h3><ul>
+      <li><a href="https://crackstation.net/" target="_blank" rel="noopener">CrackStation</a><span>Levinud paroolide MD5- ja SHA-räside tagasiotsing.</span></li>
+      <li><a href="https://haveibeenpwned.com/" target="_blank" rel="noopener">Have I Been Pwned</a><span>Kas e-posti aadress on andmelekkes olnud.</span></li>
+      <li><a href="https://www.security.org/how-secure-is-my-password/" target="_blank" rel="noopener">Parooli tugevuse kontroll</a><span>Kui kaua läheks parooli äraarvamine. Päris paroole sinna ei sisestata.</span></li>
+    </ul></div>
+    <div class="tg"><h3>Pildid</h3><ul>
+      <li><a href="https://www.aperisolve.com/" target="_blank" rel="noopener">Aperi'Solve</a><span>Laeb pildi üles ja näitab korraga värvikanaleid, bititasandeid ja metaandmeid.</span></li>
+      <li><a href="https://georgeom.net/StegOnline/" target="_blank" rel="noopener">StegOnline</a><span>Pildi kihtide ja peidetud andmete uurimine.</span></li>
+      <li><a href="https://tineye.com/" target="_blank" rel="noopener">TinEye</a> ja <a href="https://lens.google/" target="_blank" rel="noopener">Google Lens</a><span>Pildi päritolu otsing: kus see pilt veel on.</span></li>
+    </ul></div>
+    <div class="tg"><h3>Võrk ja riistvara</h3><ul>
+      <li><a href="https://jodies.de/ipcalc" target="_blank" rel="noopener">IP-kalkulaator</a><span>Alamvõrk, mask, hostide arv.</span></li>
+      <li><a href="https://macvendors.com/" target="_blank" rel="noopener">MAC Vendors</a><span>MAC-aadressi järgi seadme tootja.</span></li>
+      <li><a href="https://en.wikipedia.org/wiki/List_of_file_signatures" target="_blank" rel="noopener">Failisignatuuride loend</a><span>Faili esimeste baitide järgi failitüüp.</span></li>
+      <li><a href="https://www.epochconverter.com/" target="_blank" rel="noopener">Epoch Converter</a><span>Unixi ajatempel kuupäevaks.</span></li>
+    </ul></div>
+    <div class="tg"><h3>Otsing</h3><ul>
+      <li><a href="https://web.archive.org/" target="_blank" rel="noopener">Wayback Machine</a><span>Veebilehe varasemad versioonid.</span></li>
+      <li><a href="https://who.is/" target="_blank" rel="noopener">Who.is</a><span>Domeeni omanik, registreerimise aeg ja nimeserverid.</span></li>
+      <li><a href="https://www.virustotal.com/" target="_blank" rel="noopener">VirusTotal</a><span>Kahtlase lingi või faili kontroll.</span></li>
+    </ul></div>
+    <div class="tg"><h3>Edasi harjutamiseks</h3><ul>
+      <li><a href="https://sites.google.com/view/cybertasks/k%C3%BCberpuuring" target="_blank" rel="noopener">TalTechi küberülesanded algajatele</a><span>KüberPuuringu varasemate ülesannete laadis näited koos selgitustega.</span></li>
+      <li><a href="https://play.picoctf.org/practice" target="_blank" rel="noopener">picoCTF</a><span>Sadu lipujahi ülesandeid, algajale sobivad on märgitud.</span></li>
+      <li><a href="https://overthewire.org/wargames/bandit/" target="_blank" rel="noopener">OverTheWire: Bandit</a><span>Linuxi käsurea mäng tasemete kaupa.</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>Ülesanded</h2>
+    <p class="lead">Lihtne ülesanne annab 1 punkti, keskmine 2 ja raske 3. Vihje avamine punkte ei vähenda.</p>
+  </div>
+  <div class="filters" id="filters" role="group" aria-label="Kategooria filter">
+    <button class="chip" type="button" data-f="all" aria-pressed="true">Kõik</button>
+    <button class="chip" type="button" data-f="krypto" aria-pressed="false">Krüpto</button>
+    <button class="chip" type="button" data-f="vork" aria-pressed="false">Riistvara ja võrk</button>
+    <button class="chip" type="button" data-f="pilt" aria-pressed="false">Pilt</button>
+    <button class="chip" type="button" data-f="otsing" aria-pressed="false">Otsing ja turvalisus</button>
+  </div>
+  <div class="tasks" id="tasks"></div>
+</section>
+
+<section class="rules">
+  <h3>Koolivooru tingimused</h3>
+  <ul>
+    <li>Test on individuaalne, aega on 60–90 minutit. Kõiki ülesandeid 45 minutiga ei jõua.</li>
+    <li>Ülesandeid võib lahendada suvalises järjekorras: alusta neist, mis tunduvad lihtsad.</li>
+    <li>Internet ja tööriistad on lubatud, teise inimese ega tehisintellekti abi mitte.</li>
+    <li>Kui üks ülesanne jääb kinni, jäta see vahele ja tule hiljem tagasi.</li>
+  </ul>
+</section>
+
+<footer>Harjutusülesanded on koostatud Saaremaa Gümnaasiumi õpilastele KüberPuuringu eelvooruks valmistumiseks. Need ei ole võistluse päris ülesanded.</footer>
+</div>
+
+<script>
+const T=[
+ {id:"b64",cat:"krypto",lvl:1,title:"Kuuekümne nelja tähemärgi kood",text:"Selline tekst lõpeb sageli võrdusmärgiga ja sisaldab suuri ja väikesi tähti ning numbreid. Mis sõna on peidetud?",data:"a8O8YmVya2FpdHNl",hint:"Tegu on Base64-ga. CyberChefis vali „From Base64“. Täpitähe jaoks peab märgistik olema UTF-8."},
+ {id:"caesar",cat:"krypto",lvl:1,title:"Rooma keisri šiffer",text:"Iga täht on tähestikus mõne koha võrra edasi nihutatud. Mis linna nimi see on?",data:"Nxuhvvdduh",hint:"Caesari šiffer. Proovi nihet 3 tagasi (dCode või CyberChefi „ROT13“ muudetud nihkega)."},
+ {id:"hex",cat:"krypto",lvl:1,title:"Kuueteistkümnendsüsteem",text:"Iga baitide paar on üks täht. Mis sõna see on?",data:"70 61 72 6f 6f 6c",hint:"CyberChefis „From Hex“. 61 on täht a."},
+ {id:"bin",cat:"krypto",lvl:1,title:"Ainult nullid ja ühed",text:"Neli baiti kahendsüsteemis. Mis sõna?",data:"01110111 01101001 01100110 01101001",hint:"Iga 8 bitti on üks ASCII märk. CyberChefis „From Binary“."},
+ {id:"morse",cat:"krypto",lvl:1,title:"Raadiojaama teade",text:"Punktid ja kriipsud, tähed on eraldatud tühikuga. Mis sõna on edastatud?",data:"-.-. -.-- -... . .-.",hint:"Morse'i kood. Lühike signaal on punkt, pikk on kriips."},
+ {id:"md5",cat:"krypto",lvl:2,title:"Lekkinud räsi",text:"Andmelekkest leiti kasutaja parooli räsi. Mis on parool?",data:"e10adc3949ba59abbe56e057f20f883e",hint:"32 kuueteistkümnendmärki viitavad MD5-le. Räsi ei saa „dekrüpteerida“, aga levinud paroolide räsid on tabelites olemas: proovi CrackStationit."},
+ {id:"vig",cat:"krypto",lvl:2,title:"Võtmega šiffer",text:"Teade on krüpteeritud Vigenère'i šifriga. Võti on SAAR. Mis on algne sõna?",data:"LULVEUUI",hint:"dCode → Vigenère Cipher → sisesta võti ja vali dekrüpteerimine. Iga tähe nihe sõltub võtme vastavast tähest."},
+ {id:"layer",cat:"krypto",lvl:3,title:"Sibul",text:"Teade on mitu korda järjest kodeeritud. Kooruta kiht kihi haaval. Mis lause on sees? (Tühikud ei loe.)",data:"Njk2MjY3NzYyMDYyNjEyMDZlNzk3OTIwN2E2ZTY3NzY3OQ==",hint:"Kolm kihti: Base64 → kuueteistkümnendsüsteem → nihkešiffer. CyberChefis saab toimingud ritta lohistada."},
+ {id:"bits",cat:"vork",lvl:1,title:"IPv4 aadressi pikkus",text:"Mitu bitti on ühes IPv4 aadressis (nt 192.168.1.10)?",hint:"Neli arvu vahemikus 0–255. Mitu bitti on vaja ühe sellise arvu jaoks?"},
+ {id:"port",cat:"vork",lvl:1,title:"Turvaline veebiühendus",text:"Mis on HTTPS-protokolli vaikimisi pordi number?",hint:"Tavaline HTTP kasutab porti 80."},
+ {id:"hosts",cat:"vork",lvl:2,title:"Kooli alamvõrk",text:"Klassiruumi võrk on 192.168.1.0/24. Mitu seadet saab sellesse võrku aadressi?",hint:"/24 tähendab, et viimase arvu jaoks jääb 8 bitti. Võrgu aadressi ja leviaadressi seadmele anda ei saa."},
+ {id:"mac",cat:"vork",lvl:2,title:"Tundmatu seade võrgus",text:"Ruuteri seadmete loendis on tundmatu seade MAC-aadressiga allpool. Mis firma selle seadme tootis?",data:"00:1B:63:4A:9C:12",hint:"MAC-aadressi esimesed kolm baiti on tootja tunnus. Otsi MAC Vendors lehelt."},
+ {id:"sig",cat:"vork",lvl:2,title:"Ilma laiendita fail",text:"Mälupulgalt leiti fail nimega „ylesanne“ ilma laiendita. Kuueteistkümnendsüsteemi vaates algab see nii. Mis tüüpi fail see on? (Vasta laiendiga, nt zip.)",data:"25 50 44 46 2D 31 2E 37 0A",hint:"Muuda esimesed neli baiti tekstiks või otsi failisignatuuride loendist."},
+ {id:"unix",cat:"vork",lvl:2,title:"Logi ajatempel",text:"Serveri logis on sündmuse aeg Unixi ajatemplina. Mis kuupäeval (UTC) sündmus toimus? Vasta kujul PP.KK.AAAA.",data:"1700000000",hint:"Unixi ajatempel on sekundite arv alates 1. jaanuarist 1970. Kasuta Epoch Converterit."},
+ {id:"img",cat:"pilt",lvl:2,title:"Peaaegu tühi pilt",text:"Pilt näib ühtlaselt tume, kuid sinna on midagi kirjutatud. Mis sõna on peidetud?",image:true,hint:"Tekst erineb taustast vaid paari värviühiku võrra. Liiguta liugurit: see võimendab väikseid erinevusi. Päris võistlusel teeb sama Aperi'Solve."},
+ {id:"url",cat:"otsing",lvl:2,title:"Kahtlane link",text:"Õpilane sai e-kirja, kus palutakse pangakonto kinnitada. Kellele tegelikult kuulub domeen, kuhu link viib? Vasta domeeninimega (nt naide.ee).",data:"https://www.pank.ee.konto-kinnitus.com/login?id=88231",hint:"Domeeni loetakse paremalt vasakule: viimane osa enne esimest kaldkriipsu on tippdomeen, selle ees on tegelik domeen. Kõik, mis on veel vasakul, on alamdomeen, mille omanik saab ise valida."},
+ {id:"pw",cat:"otsing",lvl:1,title:"Tugevaim parool",text:"Milline neist paroolidest on kõige raskem ära arvata?",opts:["Saaremaa2026!","P@ssw0rd","qwerty123456","kolm-roheline-kass-hüppab-merre"],hint:"Pikkus on tähtsam kui erimärgid. Levinud sõnad, kohanimed ja aastad on ründajate sõnastikes esimesed."},
+ {id:"log",cat:"otsing",lvl:3,title:"Sissetungi jälg",text:"Serveri logis on näha korduvaid sisselogimiskatseid. Millise IP-aadressi ründajal õnnestus lõpuks sisse pääseda?",data:"Oct 01 02:14:07 srv sshd: Failed password for admin from 198.51.100.7\nOct 01 02:14:09 srv sshd: Failed password for root from 198.51.100.7\nOct 01 02:31:55 srv sshd: Failed password for admin from 203.0.113.45\nOct 01 02:31:56 srv sshd: Failed password for admin from 203.0.113.45\nOct 01 02:31:58 srv sshd: Failed password for admin from 203.0.113.45\nOct 01 02:32:01 srv sshd: Failed password for opetaja from 192.0.2.88\nOct 01 02:32:03 srv sshd: Failed password for admin from 203.0.113.45\nOct 01 02:32:06 srv sshd: Accepted password for admin from 203.0.113.45\nOct 01 02:40:12 srv sshd: Failed password for root from 198.51.100.7",hint:"Otsi rida, mis ei alga sõnadega „Failed password“."},
+ {id:"osint1",cat:"otsing",lvl:1,title:"Ülikooli ajalugu",text:"Mis aastal asutati Tallinna Tehnikaülikool, kes korraldab KüberPuuringut?",hint:"Vaata ülikooli kodulehelt või entsüklopeediast."},
+ {id:"osint2",cat:"otsing",lvl:1,title:"Eesti küberajalugu",text:"Mis aastal toimusid Eesti riigiasutuste, pankade ja meediaväljaannete vastu ulatuslikud ummistusrünnakud, mis said maailmas tuntuks esimese riigi vastu suunatud küberrünnakuna?",hint:"Rünnakud olid seotud pronksiöö sündmustega."}
+];
+const H={b64:"26391391ec0f9a38c3a1f9964916d900f7b950de8f95b3747a9331529c918ad5",caesar:"b926dc6c95481ef4d769aba1d42912a1a8a7c335d6206baa47e799c9813954dd",hex:"365bdc6ae8c657d005aefebe0e904766c1d7222251738a317671cd0dac96d50d",bin:"debdc6fdb6c19c94ff78b653767bfac108d84ed51a54a58a72866dc635b15729",morse:"b4bf5d7e5fcf89ef8adb64ec9c624db850d10f2afef020ed9ef23892df0833af",md5:"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",vig:"7ae273a4c37fad3e0fea579fe71820e3a0b9fcd433a93215e28dbd23a721c511",layer:"398d2c1c5a6c74b3f0eef050447636f760a2c85822aae1def8e5faedfe9d1b26",bits:"e29c9c180c6279b0b02abd6a1801c7c04082cf486ec027aa13515e4f3884bb6b",port:"6d05621ab7cb7b4fb796ca2ffbe1a141e0d4319d3deb6a05322b9de85d69b923",hosts:"9512d95d00d61bdec03d2b99d6ecc455ee5644ae52d10e7c4a61c93062dc97a3",mac:"3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",sig:"c35b21d6ca39aa7cc3b79a705d989f1a6e88b99ab43988d74048799e3db926a3",url:"5ad4d7009d596775db217a4cbaeb77e580aeef633dadfdb1c02f82d13b3efb47",pw:"f9bfd9fe1ff13283a1cced7958317c28764bbe004cba273300cdc9cab69fe2e4",log:"eb4b2dd34d5ba9aff5f39480c21f10aff75f58d1bfe56c0d153cb60b63533992",img:"2db68b55afc1695a0f283a1e206cc0365a0b1837ea3f230f223a23b9400b2087",unix:"d4a58160970061ce5496cb00ea404c840abf723879b4b8a1e2b5a18c898c0d8f",osint1:"54e87e2783378cd883fb63bea84e2ecdd554b0646ec35a12d6df365ccad3c68b",osint2:"f1cfa5ebb149e8099d561aae57beed6c68f990f45a910ea9d7b460dbcc5350be"};
+const CATN={krypto:"Krüpto",vork:"Riistvara ja võrk",pilt:"Pilt",otsing:"Otsing"};
+const LVLN={1:"lihtne",2:"keskmine",3:"raske"};
+const KEY="sg-kyber-solved";
+let solved={};
+try{solved=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){solved={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(solved))}catch(e){}}
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g,"");
+async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const box=document.getElementById("tasks");
+T.forEach((t,i)=>{
+  const el=document.createElement("article");
+  el.className="task";el.dataset.cat=t.cat;el.id="t-"+t.id;
+  let h=`<div class="meta"><span class="cat ${t.cat}">${CATN[t.cat]}</span><span class="lvl">${i+1}. · ${LVLN[t.lvl]}</span><span class="pts">${t.lvl} p</span></div>
+  <h3>${esc(t.title)}</h3><p>${esc(t.text)}</p>`;
+  if(t.data)h+=`<div class="data"><pre>${esc(t.data)}</pre><button class="copy" type="button">Kopeeri</button></div>`;
+  if(t.image)h+=`<div class="imgbox"><canvas id="hidcv" width="320" height="120" aria-label="Tume pilt peidetud tekstiga"></canvas><div class="ctl"><label for="amp">Võimendus</label><input type="range" id="amp" min="1" max="60" value="1"><span id="ampv" class="mono">1×</span></div></div>`;
+  if(t.opts){h+=`<div class="opts" role="radiogroup">`+t.opts.map((o,k)=>`<label><input type="radio" name="o-${t.id}" id="o-${t.id}-${k}" value="${esc(o)}">${esc(o)}</label>`).join("")+`</div><div class="answer"><button type="button" class="chk">Kontrolli</button></div>`;}
+  else h+=`<form class="answer"><input id="in-${t.id}" autocomplete="off" spellcheck="false" placeholder="Vastus" aria-label="Vastus: ${esc(t.title)}"><button type="submit" class="chk">Kontrolli</button></form>`;
+  h+=`<div class="fb" hidden></div><details><summary>Vihje</summary><p>${esc(t.hint)}</p></details>`;
+  el.innerHTML=h;box.appendChild(el);
+  const fb=el.querySelector(".fb");
+  async function check(val){
+    if(!val){fb.hidden=false;fb.className="fb bad";fb.textContent="Sisesta vastus.";return}
+    const ok=(await sha(norm(val)))===H[t.id];
+    fb.hidden=false;
+    if(ok){fb.className="fb ok";fb.textContent="Õige! +"+t.lvl+" p";solved[t.id]=true;save();render()}
+    else{fb.className="fb bad";fb.textContent="Vale vastus. Proovi uuesti või ava vihje."}
+  }
+  const form=el.querySelector("form");
+  if(form)form.addEventListener("submit",e=>{e.preventDefault();check(form.querySelector("input").value)});
+  else el.querySelector(".chk").addEventListener("click",()=>{const r=el.querySelector("input[type=radio]:checked");check(r?r.value:"")});
+  const cp=el.querySelector(".copy");
+  if(cp)cp.addEventListener("click",()=>{
+    const txt=t.data;const pre=el.querySelector("pre");
+    const done=()=>{cp.textContent="Kopeeritud";setTimeout(()=>cp.textContent="Kopeeri",1500)};
+    try{navigator.clipboard.writeText(txt).then(done,()=>sel(pre))}catch(e){sel(pre)}
+  });
+});
+function sel(n){const r=document.createRange();r.selectNodeContents(n);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+
+const total=T.reduce((a,t)=>a+t.lvl,0);
+document.getElementById("tot").textContent=total;
+document.getElementById("ntask").textContent=T.length;
+function render(){
+  let got=0,n=0;
+  T.forEach(t=>{const el=document.getElementById("t-"+t.id);const s=!!solved[t.id];el.classList.toggle("solved",s);if(s){got+=t.lvl;n++}});
+  document.getElementById("got").textContent=got;
+  document.getElementById("nsolved").textContent=n;
+  document.getElementById("bar").style.width=(got/total*100)+"%";
+}
+render();
+document.getElementById("reset").addEventListener("click",()=>{solved={};save();document.querySelectorAll(".fb").forEach(f=>f.hidden=true);document.querySelectorAll(".answer input").forEach(i=>i.value="");render()});
+
+document.getElementById("filters").addEventListener("click",e=>{
+  const b=e.target.closest(".chip");if(!b)return;
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b));
+  const f=b.dataset.f;
+  document.querySelectorAll(".task").forEach(t=>t.hidden=!(f==="all"||t.dataset.cat===f));
+});
+
+// peidetud tekstiga pilt: tekst erineb taustast 3 ühiku võrra
+(function(){
+  const cv=document.getElementById("hidcv");if(!cv)return;
+  const ctx=cv.getContext("2d");
+  const W=cv.width,Hh=cv.height;
+  const off=document.createElement("canvas");off.width=W;off.height=Hh;
+  const o=off.getContext("2d");
+  o.fillStyle="rgb(28,30,36)";o.fillRect(0,0,W,Hh);
+  o.fillStyle="rgb(31,33,39)";o.font="bold 40px Arial, sans-serif";o.textAlign="center";o.textBaseline="middle";
+  o.fillText("MEREKOTKAS",W/2,Hh/2);
+  const base=o.getImageData(0,0,W,Hh);
+  // väike müra, et tekst ei paistaks ekraani heleduse muutmisel kohe välja
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  for(let i=0;i<base.data.length;i+=4){const n=rnd()<0.5?0:1;base.data[i]+=n;base.data[i+1]+=n;base.data[i+2]+=n}
+  function draw(a){
+    const img=ctx.createImageData(W,Hh);
+    for(let i=0;i<base.data.length;i+=4){for(let c=0;c<3;c++){img.data[i+c]=Math.max(0,Math.min(255,(base.data[i+c]-28)*a+28))}img.data[i+3]=255}
+    ctx.putImageData(img,0,0);
+  }
+  draw(1);
+  const amp=document.getElementById("amp"),v=document.getElementById("ampv");
+  amp.addEventListener("input",()=>{v.textContent=amp.value+"×";draw(+amp.value)});
+})();
+</script>
+</body>
+</html>
